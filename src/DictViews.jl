@@ -12,21 +12,24 @@ export
     KeysView,
     ValuesView
 
+abstract View{T}
 
-# Non-exported helper function
+length(v::View) = length(v.d)
 
-function print_iterable(io::IO, itr)
+eltype{T}(v::View{T}) = T
+
+function print_iterable(io::IO, view::View)
     print(io, '(')
-    state = start(itr)
-    if !done(itr, state)
-        x, state = next(itr, state)
+    state = start(view)
+    if !done(view, state)
+        x, state = next(view, state)
         if typeof(x) <: String
             print_quoted(io, x)
         else
             print(io, x)
         end             
-        while !done(itr, state)
-            x, state = next(itr, state)
+        while !done(view, state)
+            x, state = next(view, state)
             print(io, ',')
             if typeof(x) <: String
                 print_quoted(io, x)
@@ -38,23 +41,8 @@ function print_iterable(io::IO, itr)
     print(io, ')')
 end
 
-
-
-# DictView
-
-abstract DictView{T}
-
-length(v::DictView) = length(v.d)
-
-eltype{T}(v::DictView{T}) = T
-
-
-
-
-# KeysView
-
-immutable KeysView{T} <: DictView{T}
-    d::Dict{T}
+immutable KeysView{T} <: View{T}
+    d::Associative{T}
 end
 
 start(v::KeysView) = start(v.d)
@@ -69,13 +57,8 @@ function show{T}(io::IO, v::KeysView{T})
     print_iterable(io, v)
 end
 
-
-
-
-# ValuesView
-
-immutable ValuesView{T} <: DictView{T}
-    d::Dict{T}
+immutable ValuesView{T} <: View{T}
+    d::Associative{T}
 end
 
 start(v::ValuesView) = start(v.d)
