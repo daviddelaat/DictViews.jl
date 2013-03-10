@@ -7,7 +7,7 @@ import
     Base.length,
     Base.show,
     Base.eltype
-
+    
 export 
     KeysView,
     ValuesView
@@ -16,21 +16,27 @@ export
 # Non-exported helper function
 
 function print_iterable(io::IO, itr)
-    first = true
-    for x in itr
-        if first
-            first = false
-        else
-            print(io, ',')
-        end
+    print(io, '(')
+    state = start(itr)
+    if !done(itr, state)
+        x, state = next(itr, state)
         if typeof(x) <: String
             print_quoted(io, x)
         else
             print(io, x)
+        end             
+        while !done(itr, state)
+            x, state = next(itr, state)
+            print(io, ',')
+            if typeof(x) <: String
+                print_quoted(io, x)
+            else
+                print(io, x)
+            end
         end
     end
+    print(io, ')')
 end
-
 
 
 
@@ -47,7 +53,7 @@ eltype{T}(v::DictView{T}) = T
 
 # KeysView
 
-type KeysView{T} <: DictView{T}
+immutable KeysView{T} <: DictView{T}
     d::Dict{T}
 end
 
@@ -59,9 +65,8 @@ function next(v::KeysView, state)
 end
 
 function show{T}(io::IO, v::KeysView{T})
-    print(io, "KeysView{$T}(")
+    print(io, "KeysView{$T}")
     print_iterable(io, v)
-    print(io, ')')
 end
 
 
@@ -69,7 +74,7 @@ end
 
 # ValuesView
 
-type ValuesView{T} <: DictView{T}
+immutable ValuesView{T} <: DictView{T}
     d::Dict{T}
 end
 
@@ -81,9 +86,8 @@ function next(v::ValuesView, state)
 end
 
 function show{T}(io::IO, v::ValuesView{T})
-    print(io, "ValuesView{$T}(")
+    print(io, "ValuesView{$T}")
     print_iterable(io, v)
-    print(io, ')')
 end
 
 end
