@@ -21,6 +21,8 @@ immutable KeysView{K,V} <: View{K}
     a::Associative{K,V}
 end
 
+keys(a::Associative) = KeysView(a)
+
 start(v::KeysView) = start(v.a)
 done(v::KeysView, state) = done(v.a, state)
 function next(v::KeysView, state)
@@ -31,6 +33,8 @@ end
 immutable ValuesView{K,V} <: View{V}
     a::Associative{K,V}
 end
+
+values(a::Associative) = ValuesView(a)
 
 start(v::ValuesView) = start(v.a)
 done(v::ValuesView, state) = done(v.a, state)
